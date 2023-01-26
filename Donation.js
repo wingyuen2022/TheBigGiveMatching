@@ -1,3 +1,5 @@
+// Written by wingyuen2022
+
 enum Result {
 	Success,
 	Fail
@@ -167,46 +169,42 @@ function initialiseSimulation() {
 }
 
 // Finalise donation
-function finaliseFund(donationId: string) {
-	let result: Result = Result.Fail;
-	let listOfFundByDonationId = listOfFunds.filter(curFund=>curFund.getDonationId()===donationId);
-	listOfFundByDonationId.map((curFund)=>{
-		if (collectDonation(donationId) === Result.Success) {
-			result = curFund.finaliseFund();
-		}
-	});
-	return result;
-}
-
 function collectDonation(donationId: string): Result {
 	let result: Result = Result.Fail;
 	let targetDonation = listOfDonations.filter(curDonation=>curDonation.getDonationId()===donationId);
 	if (targetDonation && targetDonation.length === 1) {
 		targetDonation[0].collectDonation();
-		result = Result.Success;
+		result = finaliseFund(donationId);
 	}
 	return result;
 }
 
-// Expire donation
-function expireFund(donationId: string) {
+function finaliseFund(donationId: string) {
 	let result: Result = Result.Fail;
 	let listOfFundByDonationId = listOfFunds.filter(curFund=>curFund.getDonationId()===donationId);
 	listOfFundByDonationId.map((curFund)=>{
-		if (expireDonation(donationId) === Result.Success) {
-			result = curFund.expireMatching();
-		}
+		result = curFund.finaliseFund();
 	});
 	return result;
 }
 
+// Expire donation
 function expireDonation(donationId: string): Result {
 	let result: Result = Result.Fail;
 	let targetDonation = listOfDonations.filter(curDonation=>curDonation.getDonationId()===donationId);
 	if (targetDonation && targetDonation.length === 1) {
 		targetDonation[0].expireMatching();
-		result = Result.Success;
+		result = expireFund(donationId);
 	}
+	return result;
+}
+
+function expireFund(donationId: string) {
+	let result: Result = Result.Fail;
+	let listOfFundByDonationId = listOfFunds.filter(curFund=>curFund.getDonationId()===donationId);
+	listOfFundByDonationId.map((curFund)=>{
+		result = curFund.expireMatching();
+	});
 	return result;
 }
 
@@ -242,8 +240,8 @@ function case1() {
 	initialiseSimulation();
 	//display();
 	runMatching();
-	let finaliseResult1 = finaliseFund(listOfDonations[0].getDonationId()); // Finalise Donation 1
-	let finaliseResult2 = finaliseFund(listOfDonations[1].getDonationId()); // Finalise Donation 2
+	let finaliseResult1 = collectDonation(listOfDonations[0].getDonationId()); // Finalise Donation 1
+	let finaliseResult2 = collectDonation(listOfDonations[1].getDonationId()); // Finalise Donation 2
 	display();
 	console.log("Finalise Donation 1: " + Result[finaliseResult1]);
 	console.log("Finalise Donation 2: " + Result[finaliseResult2]);
@@ -255,8 +253,8 @@ function case2() {
 	initialiseSimulation();
 	//display();
 	runMatching();
-	let finaliseResult = finaliseFund(listOfDonations[0].getDonationId()); // Finalise Donation 1
-	let expireResult = expireFund(listOfDonations[1].getDonationId()); // Expire Donation 2
+	let finaliseResult = collectDonation(listOfDonations[0].getDonationId()); // Finalise Donation 1
+	let expireResult = expireDonation(listOfDonations[1].getDonationId()); // Expire Donation 2
 	display();
 	console.log("Finalise Donation 1: " + Result[finaliseResult]);
 	console.log("Expire Donation 2: " + Result[expireResult]);
